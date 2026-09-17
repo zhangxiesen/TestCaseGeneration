@@ -1,0 +1,555 @@
+import random
+import os
+import re
+import csv
+from typing import List, Dict
+
+
+def build_refactoring_prompt(
+    sample_id: int,
+    refactoring_type: str,
+    feature_pool: List[str],
+    max_feature_cnt: int = 7
+) -> Dict:
+    pick_num = random.randint(1, max_feature_cnt)
+    picked_features = random.sample(feature_pool, k=pick_num)
+
+    source_cls = f"SourceClass{sample_id}"
+    target_cls = f"TargetClass{sample_id}"
+
+    description = f"""Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: {refactoring_type}. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features."""
+
+    clause_list = [
+        f"The {source_cls} class of the method to be moved contains a field of the {target_cls} class type",
+        f"The method to be moved contains formal parameters of the {target_cls} class type."
+    ]
+    selected_clause = random.choice(clause_list)
+
+    conditions = f"""[Conditions]
+    1. Source class name: {source_cls}
+    2. Target class name: {target_cls}
+    3. The method name to be moved: methodToBeMoved
+    4. {selected_clause}
+    5. The package name: test.move """
+
+    feature_text_lines = "\n".join([f"- {ft}" for ft in picked_features])
+    features = f"""[Features]
+{feature_text_lines}"""
+
+    full_prompt = f"""===== PROMPT SAMPLE {sample_id} =====
+[Description]
+{description}
+
+{conditions}
+
+{features}"""
+
+    return {
+        "sample_id": sample_id,
+        "refactoring_type": refactoring_type,
+        "pick_feature_count": pick_num,
+        "source_class": source_cls,
+        "target_class": target_cls,
+        "picked_features": picked_features,
+        "Description": description,
+        "Conditions": conditions,
+        "Features": features,
+        "full_prompt": full_prompt
+    }
+
+
+def batch_generate_prompts(
+    total_generate: int,
+    refactoring_type: str,
+    feature_pool: List[str],
+    max_feature: int = 7
+) -> List[Dict]:
+    result_list = []
+    for sid in range(1, total_generate + 1):
+        item = build_refactoring_prompt(
+            sample_id=sid,
+            refactoring_type=refactoring_type,
+            feature_pool=feature_pool,
+            max_feature_cnt=max_feature
+        )
+        result_list.append(item)
+    return result_list
+
+
+def extract_java_code(llm_response_text: str) -> str:
+    pattern = re.compile(r"```java\s*(.*?)```", re.DOTALL)
+    match = pattern.search(llm_response_text)
+    if match:
+        code = match.group(1)
+    else:
+        code = llm_response_text
+    return code.strip()
+
+
+def save_java_file(sample_id: int, llm_response_text: str, output_root_dir: str = "./gen_java_output"):
+    os.makedirs(output_root_dir, exist_ok=True)
+    java_code = extract_java_code(llm_response_text)
+    filename = f"SourceClass{sample_id}.java"
+    full_path = os.path.join(output_root_dir, filename)
+
+    with open(full_path, "w", encoding="utf-8") as f:
+        f.write(java_code)
+    print(f"✅ 已保存：{full_path}")
+    return full_path
+
+
+if __name__ == "__main__":
+    move_method_feature_pool = [
+    "There exists a superclass declaring an instance method that takes two formal parameters of the same target‑class type.",
+    "The instance method in superclass is final and is inherited by multiple subclasses without being overridden in any subclass.",
+    "There are call‑sites invoking this inherited method inside the body of its subclasses.",
+    "Perform Move Instance Method refactoring to move the inherited instance method from superclass to one of its parameter’s class (target component class).",
+    "The method declaration after being moved should only keep one formal parameter.",
+    "Subclass instances (SubClass.this) are available at those call‑sites inside subclasses.",
+    "There is a superclass which defines an instance method whose first formal parameter is of target‑class type;",
+    "The superclass instance method accesses instance fields belonging to the superclass;",
+    "There exists a subclass inheriting this instance method from superclass without overriding it;",
+    "Inside the subclass method body there exists a call‑site invoking the inherited superclass instance method;",
+    "Perform Move Instance‑Method refactoring to move the instance method into the type of its first parameter;",
+    "The call‑site inside subclass can access subclass instance via this reference.",
+    "There is a zero‑parameter instance method that does not access any instance fields of its declaring class.",
+    "The instance method can be annotated with JUnit @Test annotation which forbids static modifier.",
+    "Invoke Move Instance Method refactoring on this instance method.",
+    "The refactoring engine pops up a dialog asking whether to convert the instance method into static before moving.",
+    "User can select either Yes (convert to static) or No (keep instance method) in the confirmation dialog.",
+    "The program should have at least three classes.",
+    "The source class should extend an abstract class.",
+    "The source class should contain a method that calls a protected method from the abstract superclass.",
+    "The move method contains the 'protected 'modifier",
+    "The source class contains multiple overloaded static methods sharing the same method name.",
+    "Only one of these overloaded static methods is selected to be moved to another target class.",
+    "There exists a client class which uses static‑import to import all overloaded static methods from the original source class.",
+    "In the client class, there is a method call‑site invoking the overloaded static method that remains in the original source class (not the moved one).",
+    "Perform Move Static Members refactoring to move one single overloaded static method from source class to target class.",
+    "The source class defines an instance method which makes recursive self‑invocation via method‑reference \"this::methodName\".",
+    "The target class is a static nested class inside the source class.",
+    "The instance method logic operates on objects of the target nested‑class type.",
+    "Perform Move Instance Method refactoring to move this recursive instance method from outer source class into the static nested target class.",
+    "Recursive method‑reference call‑sites exist inside the to‑be‑moved method body.",
+    "A superclass declares an instance‑method whose first formal parameter is of the target‑class type.",
+    "The instance‑method reads instance fields that belong to the superclass.",
+    "A subclass inherits this instance‑method from superclass without overriding it.",
+    "There is a call‑site inside subclass body that invokes this inherited instance‑method.",
+    "Perform Move Instance Method refactoring to move the instance‑method into the type of its first formal parameter.",
+    "The call‑site inside subclass can access subclass instance via this reference.",
+    "The program should have at least two classes.",
+    "The source class should have a method that creates an instance of the target class.",
+    "The target class should have at least one method that is invoked from the source class.",
+    "The target class should contain private methods that are called from another method within the same class.",
+    "The source class should demonstrate a method calling functionality of the target class.",
+    "There exists a public method inside a source class.",
+    "This public method invokes multiple private helper methods declared within the same source class.",
+    "Those private helper methods have exactly one caller: only the public method invokes them, no other call‑sites exist.",
+    "Perform either Inline‑Method refactoring or Move‑Method refactoring on that public method.",
+    "The private helper methods are not reachable from outside the source class due to private access modifier.",
+    "The move method does not contain the 'static' modifier",
+    "There is an outer top‑level class which declares an instance field of some target class type.",
+    "There exists a non‑static inner nested class declared inside this outer class.",
+    "The inner class defines an instance method that does not access any fields or methods belonging to the inner class itself.",
+    "Perform Move Instance Method refactoring for the instance method defined inside inner class.",
+    "The target candidate type corresponds to the type of outer class instance field.",
+    "There is a local class defined inside a method body of an outer class.",
+    "Perform Move refactoring operation targeting this local class.",
+    "The underlying transformation logic can convert local class into inner class correctly.",
+    "The program should contain at least one class.",
+    "The class should have a static method.",
+    "Move method bodies to call external classes",
+    "There exists an enum type which implements some interface.",
+    "The enum class contains compiler‑generated synthetic static methods (values(), valueOf()) that do not exist in source code.",
+    "User selects these synthetic enum methods and triggers Pull Members Up refactoring execution.",
+    "The program should contain at least one interface.",
+    "The program should contain at least one enum.",
+    "The enum should implement the interface.",
+    "The interface should be defined before the enum in the code.",
+    "There should be a nested static class within the source class.",
+    "The nested class should contain a non-static method that calls the static method of the source class.",
+    "The move method body contains the method call",
+    "The source outer class contains a static method and a static nested inner class.",
+    "The static nested class declares an instance method with the identical simple method‑name as the outer‑class static method.",
+    "Inside the nested‑class instance‑method body, there exists a qualified call‑site invoking outer‑class static method via \"OuterClassName.staticMethod()\".",
+    "Perform Move Static Members refactoring to move both the static method and the static nested class together into the same target destination class.",
+    "A source class contains two generic static methods.",
+    "One generic static method invokes the other static method with explicit type‑argument qualification like SourceClass.<Type>methodName().",
+    "Both of these two generic static methods are selected together for Move Static Members refactoring.",
+    "The source class contains a private static method.",
+    "The destination target class already contains an overloaded static method with exactly the same method name but different formal‑parameter types.",
+    "Inside source‑class method body there are call‑sites invoking both: the existing static method in target class and the private static method from source class.",
+    "Source class declares an instance method and an instance field whose type is the target class for move refactoring.",
+    "Inside client method body, the instance method is invoked via source‑class instance reference.",
+    "There is no local variable with the same name as the source‑class field within client call‑site scope.",
+    "Source class defines an instance‑method which receives one formal parameter of target‑class type.",
+    "Inside this method body, there are invocations calling member methods on that target‑class formal‑parameter variable.",
+    "Another method inside source class invokes this method and passes a target‑class instance as argument.",
+    "The source class should have at least two methods.",
+    "The method to be moved should be called within another method in the source class.",
+    "Move the method in the inner class",
+    "There is a JUnit 4 test class containing a private instance field.",
+    "The field initializer expression throws checked exceptions.",
+    "The class contains at least one @Test annotated test‑method.",
+    "A superclass defines an instance method (or instance field).",
+    "Subclass inherits this member from superclass without overriding or re‑declaring it.",
+    "Inside the subclass method‑body, the inherited super‑class member is invoked/accessed without explicit \"this‑\" qualifier.",
+    "The annotation should be applicable to both methods and fields.",
+    "The annotation should be retained at runtime.",
+    "The annotation does not require any attributes or parameters.",
+    "The annotation should be defined with the @interface keyword.",
+    "There is a Java interface type and a concrete class implementing this interface.",
+    "Source class holds an instance field whose declared type is the interface.",
+    "Source class defines an instance method to be moved.",
+    "The program should contain at least one class implementing the interface.",
+    "The class should have at least one non-static method.",
+    "The class should contain a field of the interface type.",
+    "The class should call the non-static method within another method.",
+    "The program should contain a final class.",
+    "The program should contain a nested static class.",
+    "The nested static class should implement a generic interface.",
+    "The nested static class should have a constructor that accepts a class type as a parameter.",
+    "The program should utilize a logging framework.",
+    "The nested static class should define a method with generic parameters.",
+    "The method in the nested class should have an implementation that uses the provided parameters.",
+    "Move a method to an innerclass",
+    "There is an outer top‑level class containing a static generic nested inner class.",
+    "Inside this static nested class, there exists a static generic method whose formal‑parameter uses the enclosing nested‑class as its parameterized type.",
+    "An outer top‑level class contains a static final nested utility inner class.",
+    "The nested class contains only static fields and static methods.",
+    "The nested class declares an explicit private constructor and there are zero call‑sites invoking this constructor anywhere in the program.",
+    "There exists a generic superclass with a type parameter.",
+    "The generic superclass declares a generic field and a generic instance method.",
+    "The subclass extends the generic superclass using raw type.",
+    "The subclass already defines a field with the same simple name and a method with same simple name and compatible signature.",
+    "There is a Java interface declaring a default method with method body.",
+    "There exists a concrete class that implements this interface without overriding the default method.",
+    "There are two separate Java interfaces.",
+    "Source interface defines a default method with method body.",
+    "The user selects this default method and invokes Move Instance Method refactoring, choosing another interface as destination.",
+    "The program should define a base class with static fields and methods.",
+    "The base class should contain a static boolean field.",
+    "The base class should have a static method that prints a number.",
+    "A derived class should extend the base class and invoke the static method in its constructor.",
+    "The derived class should access the static boolean field from the base class.",
+    "There should be a separate class with the same static field name as the base class but with a different value.",
+    "The separate class should have its own static method that prints a different number.",
+    "A superclass contains static field and static method.",
+    "Subclass extends this superclass and references the inherited static members with unqualified names inside its constructor.",
+    "A separate source class defines static field and static method with exactly the same simple names as the static members in superclass.",
+    "A class contains a calculation method whose return expression invokes multiple private helper methods defined in the same class.",
+    "Some helper methods depend on further private methods and instance fields of the host class.",
+    "Invoke Extract Method Object refactoring on the calculation expression.",
+    "Source class contains two overloaded instance methods with same name, different parameter types.",
+    "One of the overloaded methods receives a parameter whose type is the target class for move refactoring.",
+    "Another method inside source class invokes this overloaded method passing an instance of target class as argument.",
+    "The move method includes the privatization method call",
+    "A source line contains an expression statement followed by an end‑of‑line comment.",
+    "User selects only the expression statement, excluding the trailing end‑of‑line comment.",
+    "An instance method contains an anonymous inner class declaration.",
+    "Inside a method of the anonymous inner class, there is a method invocation using \"this\" as argument, where \"this\" refers to the anonymous inner class instance.",
+    "Source class contains instance fields and non-public instance methods referenced inside an instance method.",
+    "User wants to perform Move Instance Method to move this method into another class selected from a field or method parameter.",
+    "Desired behaviour: automatically encapsulate accessed fields by introducing getters and setters, automatically widen visibility of accessed non-public methods, rewrite references to use getter/setter.",
+    "The class should have an integer field to store a value.",
+    "The class should have a field of another class type.",
+    "The move method is called from multiple places",
+    "Move the method body to invoke the privatization method",
+    "Invoke Introduce Method refactoring and supply a new method name.",
+    "An instance method declares an anonymous inner class.",
+    "Inside an overridden method of the anonymous inner class, there is a method invocation with \"this\" as argument; this \"this\" refers to the anonymous inner class instance.",
+    "A method should be provided to perform an operation using an integer parameter.",
+    "Another method should be defined to log the updated integer value.",
+    "The class should have at least two methods that accept different parameter types.",
+    "The move method body contains the privatization field call",
+    "The method should prepare anonymous classes within a specified element.",
+    "The method should accept a child element for processing.",
+    "An inner visitor class should be defined to handle the traversal of child elements.",
+    "The visitor should override a method to process each element recursively.",
+    "The first class contains a method that accepts an instance of the second class as a parameter.",
+    "Within this method, there is a null check before recursively calling itself with the result of a method from the second class.",
+    "The second class has a method that returns an instance of itself, which may return null.",
+    "The first class should contain a method that takes an instance of the second class as a parameter.",
+    "The method should check if the passed instance is not null before invoking another method on it.",
+    "The second class should have a method that returns an instance of itself, which may return null.",
+    "Source class declares an instance method which recursively calls itself.",
+    "This recursive method does not access any instance fields of the source class.",
+    "A source class defines an instance method with self-recursive invocation.",
+    "The recursive method does not access any instance fields of the source class.",
+    "Move the method body to contain this keyword",
+    "Move methods are not static methods",
+    "Move methods in generic classes",
+    "A source file uses static import to reference a static method, invoking the method without class qualifier.",
+    "The move method is the privatization method",
+    "Source class has an instance method whose body contains static references such as System.out, and does not access any instance members of the source class.",
+    "The method accepts a parameter whose type is the destination class for Move Instance Method.",
+    "User invokes Move Instance Method to move this method into the parameter type, and supplies a parameter name for the original source class instance.",
+    "A class defines a protected constructor.",
+    "Another class contains a method that creates an anonymous subclass of this class, which is allowed to access the protected constructor by Java inheritance rules.",
+    "Perform Move Instance Method refactoring to move this method into a third unrelated class.",
+    "One class contains a static method which is referenced inside a method of another separate class.",
+    "Perform Move Static Members refactoring to move this static method into a third empty class.",
+    "Source class contains an instance method with a formal parameter named x.",
+    "Inside the method, there is an assignment to a field x of an object whose type is the target class for move refactoring.",
+    "A class contains an instance method that does not access any instance members and does not reference \"this\".",
+    "User invokes Move Instance Method refactoring on this method.",
+    "Feature request: the refactoring engine should detect that no instance state is used, automatically convert the instance method to static and use Move Members logic instead of Move Instance Method, avoiding unnecessary instance parameter.",
+    "Move a method to invoke another method",
+    "The first class contains a private instance of the second class.",
+    "It has a public method that calls a private method, passing the instance of the second class as a parameter.",
+    "The second class has a public method that returns an integer score.",
+    "Move a method to call a method in another class",
+    "Feature proposal for a new large‑scale refactoring called Introduce wrapper class.",
+    "The refactoring should take a group of class fields or local variables, create a new wrapper class containing those fields, add a final wrapper instance field in original class, and rewrite all accesses to original variables as accesses through the wrapper instance.",
+    "A related Replace with wrapper class refactoring should reuse an existing wrapper class and replace scattered variable references with wrapper accesses.",
+    "Additional related capability: refactor method calls with many separate arguments taken from object fields into a single call passing the wrapper object.",
+    "Source class B contains an instance method printScore accepting an A parameter i_a.",
+    "Inside printScore, the parameter i_a is used to invoke method score().",
+    "User performs Move Instance Method on printScore and selects the parameter type A as target class.",
+    "The class contains a static method that accepts an Object parameter.",
+    "The static method is invoked directly on the class using the class name and a parameter.",
+    "The implementation details of the method are not provided.",
+    "Source code contains incomplete syntax (broken method name) and the AST is malformed.",
+    "User invokes Move refactoring quickly with caret placed inside the broken method definition.",
+    "Feature request for a new refactoring Convert Static Method to Instance Method.",
+    "Basic variant: remove static modifier from static method, add default constructor if needed, rewrite all static method calls to create a new instance and invoke instance method.",
+    "Advanced variant: move static method parameters into a new constructor, create instance fields for those parameters, remove corresponding parameters from method signature, rewrite call sites to construct object with arguments and invoke instance method.",
+    "The outer class contains two inner classes, one of which has private methods and fields.",
+    "The move method contains the target class parameters",
+    "An outer class contains two nested classes A and B, where B extends A.",
+    "Class A declares private method foo and private field i.",
+    "Method test inside A accesses foo and i.",
+    "The class contains a private static method.",
+    "The main method calls this private method directly.",
+    "The task is to move the private method to another class while maintaining its functionality.",
+    "An outer class contains two non‑static inner classes A and B, where B extends A.",
+    "Class A declares a private method foo and private field i.",
+    "The method test inside A invokes foo and reads i.",
+    "A private static method is referenced from outside its declaring class.",
+    "A class contains two instance methods foo and inc.",
+    "Place the caret between method name inc and parentheses of method inc definition.",
+    "Invoke Move Instance Method refactoring.",
+    "The source class should have one method.",
+    "The to-be-moved method should have the parameter of the target class.",
+    "The to-be-moved method should return a value.",
+    "An interface contains a default method with body and an abstract method without body.",
+    "User invokes Move Instance Method to move either the default method or the abstract interface method into a regular concrete class.",
+    "A Spring @Service class MyService contains a private @Autowired field myFactory and an instance method someOtherMethod that uses myFactory.",
+    "User invokes Move Instance Method to move someOtherMethod to another Spring @Component class MyComponent.",
+    "The refactoring engine only moves the method and adds a host parameter MyService myService, generating myService.myFactory.create() inside target method.",
+    "Source class DataUser contains method filter which accepts a Data parameter data.",
+    "Inside filter, there exists a local variable named datums and iteration over data.datums (the field of Data).",
+    "Feature proposal for Move Instance Method: when moving a method from class A to class B, automatically detect existing field fA of type A inside target class B and reuse this field instead of creating a new method parameter.",
+    "Rewrite call site fA.sub() to direct sub() invocation in B. Rewrite inside moved method sub() all references to original A instance to access via the existing field fA.",
+    "Current Move Instance Method always adds a new host parameter; it does not scan target class for compatible existing fields to reuse.",
+    "This is a feature proposal rather than a bug that produces broken code after refactoring execution.",
+    "A class is defined with a method that creates a user interface element.",
+    "This method adds a control listener to the element, which handles resize events.",
+    "Inside the event handler, there is a conditional check on the event time before printing a message.",
+    "A main class is defined with constants for the number of threads and a sentinel value for missing data.",
+    "There is a method intended to analyze pairs of samples at specific loci.",
+    "The method includes a placeholder for implementation, indicated by comments, to return the results of the analysis.",
+    "A private method is defined to create a selection change listener.",
+    "The listener checks if the selected elements size is one, updating the current selection and showing a preview if it changes.",
+    "Class B defines a private method m(int a). Class C extends B and already declares a public method m(int a).",
+    "User invokes Move Method refactoring to move B#m(int) into subclass C.",
+    "The refactoring precondition check only considers method name and rejects transformation with message that method with same name already exists.",
+    "An abstract class defines a method with an integer parameter that must be implemented by subclasses.",
+    "A concrete subclass provides an implementation for this method, allowing it to be called without parameters.",
+    "Another abstract subclass overrides the method but does not match the signature, instead providing a version with no parameters that returns an integer.",
+    "A subclass in another package overrides this method with the same signature, returning a different long value.",
+    "A third class, also in the same package as the subclass, attempts to call the overridden method, demonstrating polymorphism.",
+    "A block of code initializes an instance of a class and calls a private method with this instance as a parameter.",
+    "The private method is defined to accept an instance of the same class type, allowing it to access the instance's members or perform specific operations.",
+    "The use of a private method indicates that it's intended for internal class logic only, promoting encapsulation.",
+    "The source class should be an abstract class.",
+    "The source class should have one abstract method.",
+    "The abstract method should have a parameter of the target class.",
+    "The class contains three methods: one private method, one public method that calls the private method, and another private method that is never referenced.",
+    "The private method can only be accessed from within the class, making it inaccessible to outside classes.",
+    "The public method allows external access to the class while internally invoking the private method, demonstrating encapsulation.",
+    "The unused private method does not contribute to the class's functionality.",
+    "The class is part of a refactoring operation that handles moving code elements within a codebase.",
+    "It initializes a member variable by casting an object, indicating it works with various code elements like methods or fields.",
+    "The method returns a descriptive name for the participant, likely for logging or display during the refactoring process.",
+    "Another method always returns a new, empty status object, implying no preconditions are checked or enforced.",
+    "The final method prints a message when invoked, serving as a placeholder for the actual logic of the move operation, but currently returns no changes.",
+    "The method calls a function that computes the absolute value of a double.",
+    "It passes a double literal as an argument to this function.",
+    "The method does not handle or return any value from the function call.",
+    "If the selected elements size is zero, it triggers an action to disable the finish button.",
+    "The presence of an interface that declares a method;",
+    "The to-be-moved method takes a parameter of the target class type.",
+    "The method is public, meaning it must be accessible wherever it is called.",
+    "The class should contain a method.",
+    "The method should have duplicate parameter names.",
+    "The target class should have a method with the same name as the method in the source class.",
+    "The source class should have a field of the target class type.",
+    "The source class should have a generic type.",
+    "The source class should contain an inner class.",
+    "The inner class should have a method that modifies a field from the outer class.",
+    "The target class should exist as a separate class.",
+    "The source class should extend another class.",
+    "The source class should contain an instance of the extended class.",
+    "The source class should have a method that returns a value.",
+    "The target class should have a method that calls the method from the source class.",
+    "The method is declared as native, indicating it is implemented in another language (often C or C++).",
+    "The source class should have a method that returns an integer value.",
+    "The source class should have a nested class that extends it.",
+    "The nested class should override a method from the source class.",
+    "The nested class should have a method that calls the overridden method from the source class.",
+    "The source class should have a parameterized method in the nested class.",
+    "The source class should contain a nested inner class.",
+    "The inner class should have a method that takes a parameter of another class.",
+    "The method in the inner class should reference the outer class instance.",
+    "The outer class should have no additional methods defined in this snippet.",
+    "The method in the subclass and the renamed method in the parent class have the same formal parameter type.",
+    "Rename method calls exist in the parent class.",
+    "Rename the method to the method name in the subclass.",
+    "The source class should have a field of the target class type.",
+    "The source class should have at least one non-static method.",
+    "The non-static method in the source class should call a method from the target class.",
+    "The source class should have a static method defined within it.",
+    "The target class should have at least one method defined within it.",
+    "The source class should have a nested class.",
+    "The nested class should have a method that accepts a parameter of the target class type.",
+    "The method in the nested class should call a method on the parameter of the target class.",
+    "The nested class should call a static method from the source class.",
+    "The source class should contain at least one static method.",
+    "The source class should contain a static nested class.",
+    "The nested class should utilize a method from a utility class (e.g., asList).",
+    "The source class should have a non-static method that accepts a parameter of the target class type.",
+    "The method in the source class should call another method within the same class.",
+    "The source class should have a field.",
+    "The source class method should modify its own field.",
+    "The source class should extend another class.",
+    "The source class should override a method from the parent class.",
+    "The overridden method should have a parameter of the same type as defined in the parent class.",
+    "The source class should contain non-static methods.",
+    "The source class should have methods that take parameters of the target class type.",
+    "The target class should contain a nested class.",
+    "The nested class should be accessible from the source class methods.",
+    "The source class should have fields.",
+    "The method in the source class should access fields of the target class.",
+    "The target class should contain an array of the source class type.",
+    "The source class should have a method that takes a parameter of the target class type.",
+    "The method in the source class should declare local variables.",
+    "The method should contain expressions involving instance or class fields.",
+    "The method should include a print statement.",
+    "The source class should contain a field of another class type.",
+    "The source class should define an enum.",
+    "The source class should have a method that takes an enum parameter.",
+    "The method should include a switch statement based on the enum parameter.",
+    "The switch statement should contain case branches with print statements.",
+    "The source class should contain fields of different types, including a static field.",
+    "The switch statement should contain case branches that print the values of the class's fields.",
+    "The enum should have at least two constants.",
+    "The parent class contains multiple methods.",
+    "An AspectJ aspect type declares members.",
+    "In a regular Java class, invoke the static aspect instance accessor method on that aspect to obtain the aspect singleton instance.",
+    "Invoke code‑completion after the dot following the static aspect instance accessor call.",
+    "The outer class defines a generic type with two parameters.",
+    "It contains a nested inner class that is not static, which means it holds a reference to its outer class instance.",
+    "A method in the outer class accepts an instance of the nested inner class as a parameter, demonstrating a link between the two.",
+    "The source class should have a method defined within it.",
+    "The method should accept a parameter of the target class type.",
+    "The method should have a synchronized modifier.",
+    "The method should return an integer value.",
+    "The moving method is static",
+    "Move methods include method calls",
+    "The move method contains the List declaration",
+    "The first package contains a class with the same name as an annotation in a different package.",
+    "A method in the first package returns an instance of the class, while the annotation is used in a method of a different class in the same package.",
+    "Invoking a refactoring action on this method suggests moving it to another class, which may lead to ambiguity due to the naming conflict between the class and the annotation.",
+    "The first class contains a method that creates an anonymous subclass of another class.",
+    "Within this anonymous subclass, a method is defined that calls a method from the parent class, passing an instance of a third class as an argument.",
+    "The method in the parent class increments an integer field each time it is called, indicating that it modifies the state of the instance.",
+    "The first class contains a method that accepts an instance of another class as a parameter.",
+    "Within another method, a new instance of the first class is created, and the method is called with a new instance of the second class.",
+    "This demonstrates the use of method invocation with instances of different classes.",
+    "The first class is a subclass of another class, establishing an inheritance relationship.",
+    "The second class contains a field that references an instance of a third class.",
+    "The third class serves as a simple data structure without additional behavior or properties.",
+    "The move method contains the class declaration",
+    "Move methods in abstract classes",
+    "The abstract class defines two methods with the same name but different signatures—one is static and private, while the other is abstract.",
+    "A nested static class extends the abstract class and provides an implementation for the abstract method.",
+    "Within the implementation, the static private method is called using its name, which is valid in this context.",
+    "The class defines a method that converts a string into a target type using a specified value converter.",
+    "The method accepts a generic value converter that can handle conversion from a string to a target type, allowing for flexible conversion logic.",
+    "The method utilizes the convert function of the converter to perform the conversion, passing an empty string and the target class type as arguments.",
+    "The class defines a main method that takes command-line arguments and processes them.",
+    "It converts the arguments into a stream and applies a transformation to each argument using a method reference.",
+    "The transformation method changes each string to lowercase and prints the results to the standard error output.",
+    "An instance of a merger is created to handle the merging process.",
+    "The merge method is called, likely with specific parameters, to combine configurations or data.",
+    "The result of the merging process is stored in a variable, which presumably holds the merged configuration.",
+    "A method named getSomeCollection is defined but lacks proper syntax (missing parentheses).",
+    "The class contains a method doSomething that takes a String parameter but does not implement any functionality within the method body.",
+    "A class contains a final list of inner instances, initialized through its constructor.",
+    "Another class has a method that iterates over the list, adding non-null instances to a new list.",
+    "The method returns the filtered list, excluding any null entries.",
+    "A method accepts three parameters, all of which are long integers.",
+    "The method is defined with clear parameter formatting, enhancing readability.",
+    "Currently, the method does not contain any implementation or logic.",
+    "An interface is defined without any methods or properties.",
+    "A class implements this interface, serving as a concrete implementation.",
+    "In another class, a field of the interface type is annotated for dependency injection, but the method currently does not utilize the injected service.",
+    "A class is defined with a logger for logging purposes, initialized using a logging framework.",
+    "A static method in this class logs an informational message when called.",
+    "Another class is defined but does not contain any members or methods, serving as a placeholder.",
+    "The move method is called multiple times",
+    "The move method contains this keyword.",
+    "Move the method call field",
+    "A parent class is defined with a protected method, allowing access to subclasses and within the same package.",
+    "A subclass extends the parent class and contains a method that creates a runnable, which references the protected method from the parent class.",
+    "The runnable is executed within the subclass method, invoking the parent's method.",
+    "The move method lacks the target class type parameter",
+    "A class is defined with no members or methods.",
+    "An interface is defined that includes a default method, which provides a default implementation for a method that takes an instance of the previously defined class as a parameter.",
+    "The interface also declares an abstract method that requires implementation, which also takes an instance of the class as a parameter.",
+    "The target class of a move method is an interface",
+    "A method named fromOptions is defined that takes two parameters: a boolean indicating whether to ignore unavailable items and another boolean that specifies whether to allow no indices.",
+    "This method likely processes or configures options based on the provided boolean values to manage the behavior of the operation it performs.",
+    "The exact implementation details and return type are not provided, but it typically would involve handling the specified options accordingly."
+]
+
+    GENERATE_TOTAL = 1
+    refactor_name = "move method"
+    OUTPUT_JAVA_DIR = "./gen_java_output"
+
+    prompt_results = batch_generate_prompts(
+        total_generate=GENERATE_TOTAL,
+        refactoring_type=refactor_name,
+        feature_pool=move_method_feature_pool,
+        max_feature=7
+    )
+
+    # CSV字段列表（只选取需要的字段，避免多余key报错）
+    fieldnames = [
+        "sample_id",
+        "refactoring_type",
+        "pick_feature_count",
+        "source_class",
+        "target_class",
+        "picked_features",
+        "full_prompt"
+    ]
+
+    with open("move_method_prompt_output.csv", "w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in prompt_results:
+            # 构造仅包含fieldnames内字段的字典
+            csv_row = {
+                "sample_id": row["sample_id"],
+                "refactoring_type": row["refactoring_type"],
+                "pick_feature_count": row["pick_feature_count"],
+                "source_class": row["source_class"],
+                "target_class": row["target_class"],
+                "picked_features": "; ".join(row["picked_features"]),
+                "full_prompt": row["full_prompt"]
+            }
+            writer.writerow(csv_row)
+
+    print("🎉 CSV prompt 文件生成完成：move_method_prompt_output.csv")
