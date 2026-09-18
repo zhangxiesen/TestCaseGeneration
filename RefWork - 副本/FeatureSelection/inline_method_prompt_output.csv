@@ -1,0 +1,13 @@
+﻿sample_id,refactoring_type,pick_feature_count,source_class,target_class,picked_features,full_prompt
+1,inline method,2,SourceClass1,TargetClass1,Inline descendant wrapper method calls inherited base class method.; Inline utility method executes conditional actions based on threshold check result.,"===== PROMPT SAMPLE 1 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: inline method. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass1
+    2. The method name to be inlined: methodToBeInlined
+    3. The package name: test.inline 
+
+[Features]
+- Inline descendant wrapper method calls inherited base class method.
+- Inline utility method executes conditional actions based on threshold check result."

@@ -1,0 +1,70 @@
+﻿sample_id,refactoring_type,pick_feature_count,source_class,target_class,picked_features,full_prompt
+1,rename method,2,SourceClass1,TargetClass1,A class contains renamed field and internal classes; The parent class contains internal classes and interfaces,"===== PROMPT SAMPLE 1 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename method. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass1
+    2. The method name to be renamed: methodToBeRenamed
+    3. The package name: test.renamemethod 
+
+[Features]
+- A class contains renamed field and internal classes
+- The parent class contains internal classes and interfaces"
+2,rename method,2,SourceClass2,TargetClass2,The parent class defines inner classes and interfaces that establish functionality or contracts to be implemented or extended by subclasses;  The method is called in multiple places,"===== PROMPT SAMPLE 2 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename method. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass2
+    2. The method name to be renamed: methodToBeRenamed
+    3. The package name: test.renamemethod 
+
+[Features]
+- The parent class defines inner classes and interfaces that establish functionality or contracts to be implemented or extended by subclasses
+-  The method is called in multiple places"
+3,rename method,5,SourceClass3,TargetClass3," The subclass overrides this method, using a different parameter name to illustrate that method signatures can remain the same while allowing for specific implementations; The parent class contains multiple methods;  There is no interface defined within this class that defines a generic method;  This setup demonstrates basic inheritance and method overriding across different classes in separate plugins; The method is the 'record' modifier","===== PROMPT SAMPLE 3 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename method. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass3
+    2. The method name to be renamed: methodToBeRenamed
+    3. The package name: test.renamemethod 
+
+[Features]
+-  The subclass overrides this method, using a different parameter name to illustrate that method signatures can remain the same while allowing for specific implementations
+- The parent class contains multiple methods
+-  There is no interface defined within this class that defines a generic method
+-  This setup demonstrates basic inheritance and method overriding across different classes in separate plugins
+- The method is the 'record' modifier"
+4,rename method,5,SourceClass4,TargetClass4, A method in the parent class is called in the subclass;  An assignment statement contains fields assigned to local variables;  Rename the method to the parent method name;  Rename the method to another method name;  An inner class in another class inherits the parent class,"===== PROMPT SAMPLE 4 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename method. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass4
+    2. The method name to be renamed: methodToBeRenamed
+    3. The package name: test.renamemethod 
+
+[Features]
+-  A method in the parent class is called in the subclass
+-  An assignment statement contains fields assigned to local variables
+-  Rename the method to the parent method name
+-  Rename the method to another method name
+-  An inner class in another class inherits the parent class"
+5,rename method,5,SourceClass5,TargetClass5," The code highlights the relationship between the two classes, where one class relies on the functionality of the other through method invocation; A class contains renamed fields and inner classes ;  The second class extends the first class and overrides the method, potentially adding or modifying behavior;  The method name is the same as the method name invoked by the external class; The method contains the 'native' modifier","===== PROMPT SAMPLE 5 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename method. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass5
+    2. The method name to be renamed: methodToBeRenamed
+    3. The package name: test.renamemethod 
+
+[Features]
+-  The code highlights the relationship between the two classes, where one class relies on the functionality of the other through method invocation
+- A class contains renamed fields and inner classes 
+-  The second class extends the first class and overrides the method, potentially adding or modifying behavior
+-  The method name is the same as the method name invoked by the external class
+- The method contains the 'native' modifier"
