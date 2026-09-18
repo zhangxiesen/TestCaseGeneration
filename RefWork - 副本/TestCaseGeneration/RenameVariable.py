@@ -5,8 +5,8 @@ from openai import OpenAI
 
 # LLM Client
 client = OpenAI(
-    api_key="",
-    base_url="https://llm-59susyrjcmp9l6z8.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+    api_key="sk-7bvW3YxpuT5RiMLl0a3eA95b82Ba4370B15b45CaD7Dd1aFc",
+    base_url="https://api.apiyi.com/v1",
 )
 
 def call_llm(prompt_text: str) -> str:
