@@ -11,9 +11,8 @@ client = OpenAI(
 
 def call_llm(prompt_text: str) -> str:
     resp = client.chat.completions.create(
-        model="qwen3.8-flash",
+        model="gpt-4o",
         messages=[{"role": "user", "content": prompt_text}],
-        extra_body={"enable_thinking": True},
         stream=False
     )
     return resp.choices[0].message.content
@@ -33,7 +32,7 @@ def safe_filename(name: str) -> str:
     return name.strip()
 
 if __name__ == "__main__":
-    # CSV is generated at the repo root (the CWD used when running the FeatureSelection scripts)
+
     CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "rename_method_prompt_output.csv")
     OUTPUT_DIR = "java_output"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
