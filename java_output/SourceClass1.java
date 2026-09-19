@@ -1,27 +1,30 @@
-package test.move;
+package test.renamefield;
 
 public class SourceClass1 {
+    private int fieldToBeRenamed;
 
-    public void methodToBeMoved(TargetClass1 target) {
-        System.out.println("Method from SourceClass1, called with parameter: " + target.getInfo());
+    public SourceClass1(int fieldToBeRenamed) {
+        this.fieldToBeRenamed = fieldToBeRenamed;
     }
 
-    // Nested class in SourceClass1
-    class NestedClass {
-        public void callMovedMethod(TargetClass1 target) {
-            methodToBeMoved(target);
+    public int getFieldToBeRenamed() {
+        return fieldToBeRenamed;
+    }
+
+    public void setFieldToBeRenamed(int fieldToBeRenamed) {
+        this.fieldToBeRenamed = fieldToBeRenamed;
+    }
+
+    public class InnerClass {
+        public void displayField() {
+            int localVariable = fieldToBeRenamed;
+            System.out.println("Local Variable: " + localVariable);
         }
     }
-}
 
-class TargetClass1 {
-    private String info;
-
-    public TargetClass1(String info) {
-        this.info = info;
-    }
-
-    public String getInfo() {
-        return info;
+    public static void main(String[] args) {
+        SourceClass1 instance = new SourceClass1(10);
+        SourceClass1.InnerClass innerInstance = instance.new InnerClass();
+        innerInstance.displayField();
     }
 }
