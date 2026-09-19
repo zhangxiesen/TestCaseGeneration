@@ -1,37 +1,61 @@
-package test.extractvar;
+package test.inline;
 
+// Source class with the method to be inlined
 public class SourceClass1 {
+    public void execute() {
+        HelperClass helper = new HelperClass();
+        helper.performTask();
+    }
+}
 
-    private int value;
-
-    public SourceClass1(int value) {
-        this.value = value;
+// Helper class with private method that will be inlined
+class HelperClass {
+    public void performTask() {
+        String result = methodToBeInlined();
+        System.out.println(result);
     }
 
-    public void refMethod(int parameter) {
-        // Early return conditions
-        if (parameter == 0) return;
-        if (this.value == 0) return;
-        if (parameter + this.value == 0) return;
-        if ((parameter - this.value) == 0) return;
+    private String methodToBeInlined() {
+        return "Method Inlined!";
+    }
+}
 
-        // Extracted variable as an array
-        int[] numbers = /*EXTRACT*/ { parameter, this.value };
+// Composition class accessing the HelperClass
+class CompositionClass {
+    private HelperClass helper;
 
-        // Object array initialized with the current instance
-        Object[] objects = { this };
-
-        // Recursive calls
-        refMethod(parameter - 1);
-        refMethod(parameter - 1);
-
-        // Print statements to ensure method progresses (can be removed in actual test)
-        System.out.println("Numbers: " + numbers[0] + ", " + numbers[1]);
-        System.out.println("Object: " + objects[0]);
+    public CompositionClass() {
+        this.helper = new HelperClass();
     }
 
-    public static void main(String[] args) {
-        SourceClass1 sc = new SourceClass1(5);
-        sc.refMethod(3);
+    public void execute() {
+        helper.performTask();
+    }
+}
+
+// Superclass with a method to be invoked using super
+class SuperClass {
+    protected void displayMessage() {
+        System.out.println("Message from SuperClass");
+    }
+}
+
+// Subclass invoking superclass method using super keyword
+class SubClass extends SuperClass {
+    @Override
+    protected void displayMessage() {
+        super.displayMessage();
+        System.out.println("Message from SubClass");
+    }
+}
+
+// Factory class with private constructor and static factory method
+class Factory {
+    private Factory() {
+        // Private constructor
+    }
+
+    public static Factory createInstance() {
+        return new Factory();
     }
 }
