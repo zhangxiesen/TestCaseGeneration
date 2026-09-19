@@ -32,15 +32,8 @@ def safe_filename(name: str) -> str:
     return name.strip()
 
 if __name__ == "__main__":
-    # Paths are resolved relative to this script, so the working directory does not matter.
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    CSV_PATH = os.path.join(SCRIPT_DIR, "..", "FeatureSelection", "inline_method_prompt_output.csv")
-    if not os.path.exists(CSV_PATH):
-        raise SystemExit(
-            "[ERROR] prompt CSV not found: " + os.path.abspath(CSV_PATH) + "\n"
-            "Please run the matching script in FeatureSelection/ first to generate it."
-        )
-    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "java_output")
+    CSV_PATH = r"E:\TestingRefactoring\RefWork\FeatureSelection\inline_method_prompt_output.csv"
+    OUTPUT_DIR = "java_output"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     df = pd.read_csv(CSV_PATH, header=None, skiprows=1)
