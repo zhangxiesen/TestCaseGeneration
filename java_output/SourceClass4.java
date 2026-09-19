@@ -1,19 +1,31 @@
-package test.renamemethod;
+package test.renamevar;
 
-public class SourceClass4 {
-    private int value;
+interface RenameInterface {
+    int SOME_CONSTANT = 42;
+    void setField(int variableToBeRenamed);
+}
 
-    public SourceClass4(int initialValue) {
-        this.value = initialValue;
+public class SourceClass4 implements RenameInterface {
+
+    private int variableToBeRenamed;
+
+    @Override
+    public void setField(int variableToBeRenamed) {
+        this.variableToBeRenamed = variableToBeRenamed;
     }
 
-    // Method to be renamed
-    public record int methodToBeRenamed() {
-        return value;
+    public int getField() {
+        return variableToBeRenamed;
     }
 
-    // Public method to access the instance variable ensuring encapsulation
-    public int getValue() {
-        return value;
+    public void refMethod(int variableToBeRenamed) {
+        InnerClass inner = new InnerClass();
+        inner.useField(variableToBeRenamed);
+    }
+
+    class InnerClass {
+        public void useField(int variableToBeRenamed) {
+            System.out.println("Inner class used field: " + variableToBeRenamed);
+        }
     }
 }
