@@ -1,34 +1,19 @@
-package test.renamefield;
+package test.renamemethod;
 
 public class SourceClass4 {
-    private int fieldToBeRenamed;
-    private String anotherField;
-    private double yetAnotherField;
+    private int value;
 
-    public int getFieldToBeRenamed() {
-        return fieldToBeRenamed;
+    public SourceClass4(int initialValue) {
+        this.value = initialValue;
     }
 
-    public void setFieldToBeRenamed(int fieldToBeRenamed) {
-        this.fieldToBeRenamed = fieldToBeRenamed;
+    // Method to be renamed
+    public record int methodToBeRenamed() {
+        return value;
     }
-}
 
-class TestClass {
-    public void testMethod() {
-        SourceClass4 source = new SourceClass4();
-
-        // Create an anonymous class
-        Runnable anonymousClass = new Runnable() {
-            @Override
-            public void run() {
-                int localVariable = 42; // Renaming fieldToBeRenamed to localVariable
-                source.setFieldToBeRenamed(localVariable);
-                System.out.println("Field renamed to localVariable with value: " + source.getFieldToBeRenamed());
-            }
-        };
-
-        // Execute the anonymous class
-        anonymousClass.run();
+    // Public method to access the instance variable ensuring encapsulation
+    public int getValue() {
+        return value;
     }
 }

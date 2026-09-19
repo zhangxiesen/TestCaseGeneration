@@ -1,30 +1,49 @@
-package test.renamefield;
+package test.renamemethod;
 
+// External usage class for testing
+public class ExternalUsageClass {
+    public static void main(String[] args) {
+        SourceClass1 source = new SourceClass1();
+        String result = source.methodToBeRenamed("Hello from ExternalUsageClass!");
+        System.out.println(result);
+
+        SourceClass1.Subclass subclass = new SourceClass1.Subclass();
+        String subclassResult = subclass.methodToBeRenamed("Hello from Subclass!");
+        System.out.println(subclassResult);
+    }
+}
+
+// Source class definition
 public class SourceClass1 {
-    private int fieldToBeRenamed;
+    private String instanceField = "InstanceFieldData";
 
-    public SourceClass1(int fieldToBeRenamed) {
-        this.fieldToBeRenamed = fieldToBeRenamed;
+    // Method to be renamed
+    public String methodToBeRenamed(String input) {
+        String localVariable = instanceField; // Assignment: field to local variable
+        return localVariable + " | Message: " + input;
     }
 
-    public int getFieldToBeRenamed() {
-        return fieldToBeRenamed;
-    }
+    // Subclass definition
+    public static class Subclass extends SourceClass1 {
+        private String subclassField = "SubclassFieldData";
 
-    public void setFieldToBeRenamed(int fieldToBeRenamed) {
-        this.fieldToBeRenamed = fieldToBeRenamed;
-    }
+        @Override
+        public String methodToBeRenamed(String input) {
+            String localVariable = subclassField; // Assignment: field to local variable
+            return localVariable + " | Subclass Message: " + input;
+        }
 
-    public class InnerClass {
-        public void displayField() {
-            int localVariable = fieldToBeRenamed;
-            System.out.println("Local Variable: " + localVariable);
+        // Inner class implementing an interface
+        public class InnerClass implements ExampleInterface {
+            @Override
+            public void exampleMethod() {
+                System.out.println("InnerClass implementing ExampleInterface");
+            }
         }
     }
+}
 
-    public static void main(String[] args) {
-        SourceClass1 instance = new SourceClass1(10);
-        SourceClass1.InnerClass innerInstance = instance.new InnerClass();
-        innerInstance.displayField();
-    }
+// Example interface declaration
+interface ExampleInterface {
+    void exampleMethod();
 }

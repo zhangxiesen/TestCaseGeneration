@@ -1,37 +1,26 @@
-package test.renamefield;
+package test.renamemethod;
 
-public class SourceClass3 {
-    private String fieldToBeRenamed;
+interface Renamable {
+    void methodToBeRenamed(int value);
+}
 
-    public SourceClass3(String fieldToBeRenamed) {
-        this.fieldToBeRenamed = fieldToBeRenamed;
+public class SourceClass3 implements Renamable {
+    @Override
+    public void methodToBeRenamed(int value) {
+        System.out.println("Executing methodToBeRenamed in SourceClass3 with value: " + value);
+    }
+}
+
+class SubClass extends SourceClass3 {
+    @Override
+    public void methodToBeRenamed(int value) {
+        System.out.println("Overridden methodToBeRenamed in SubClass with value: " + value);
     }
 
-    public void testRenamingField() {
-        String localVariable = "Original Value";
-
-        Runnable inner = new Runnable() {
-            @Override
-            public void run() {
-                // Accessing both the renamed field and the local variable.
-                System.out.println("Field: " + fieldToBeRenamed);
-                System.out.println("Local Variable: " + localVariable);
-            }
-        };
-
-        inner.run();
-    }
-
-    public String getFieldToBeRenamed() {
-        return fieldToBeRenamed;
-    }
-
-    public void setFieldToBeRenamed(String fieldToBeRenamed) {
-        this.fieldToBeRenamed = fieldToBeRenamed;
-    }
-
-    public static void main(String[] args) {
-        SourceClass3 obj = new SourceClass3("Initial Field Value");
-        obj.testRenamingField();
+    class InnerClass implements Renamable {
+        @Override
+        public void methodToBeRenamed(int value) {
+            System.out.println("methodToBeRenamed implementation in InnerClass with value: " + value);
+        }
     }
 }

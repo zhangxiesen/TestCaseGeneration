@@ -1,65 +1,20 @@
-package test.renamefield;
+package test.renamemethod;
 
+// Parent class
 public class SourceClass5 {
-
-    private int field1;
-    private String field2;
-
-    private int fieldToBeRenamed; // Field to be renamed
-
-    public SourceClass5(int field1, String field2, int fieldToBeRenamed) {
-        this.field1 = field1;
-        this.field2 = field2;
-        this.fieldToBeRenamed = fieldToBeRenamed;
+    // Public method with multiple modifiers
+    public synchronized void methodToBeRenamed() {
+        System.out.println("Original method in SourceClass5");
     }
+}
 
-    public int getField1() {
-        return field1;
-    }
-
-    public void setField1(int field1) {
-        this.field1 = field1;
-    }
-
-    public String getField2() {
-        return field2;
-    }
-
-    public void setField2(String field2) {
-        this.field2 = field2;
-    }
-
-    public int getFieldToBeRenamed() {
-        return fieldToBeRenamed;
-    }
-
-    public void setFieldToBeRenamed(int fieldToBeRenamed) {
-        this.fieldToBeRenamed = fieldToBeRenamed;
-    }
-
-    // Inner class accessing renamed field indirectly
-    public class InnerClass {
-        public int getRenamedFieldFromOuter() {
-            return fieldToBeRenamed; // Accessing renamed field here
+// Another class with an inner class
+class AnotherClass {
+    // Inner class that inherits the parent class
+    class InnerClass extends SourceClass5 {
+        // Method in inner class calls the renamed method in the parent class
+        public void invokeRenamedMethod() {
+            methodToBeRenamed(); // Call the method from the parent class
         }
-    }
-
-    // Inner interface definition
-    public interface InnerInterface {
-        void innerInterfaceMethod();
-    }
-
-    // Local method with variable influencing the inner class
-    public void enclosingMethod() {
-        int localField = 10;
-
-        class LocalInnerClass {
-            public void printLocalField() {
-                System.out.println("Local field value from enclosing method: " + localField);
-            }
-        }
-
-        LocalInnerClass localInner = new LocalInnerClass();
-        localInner.printLocalField();
     }
 }
