@@ -1,0 +1,74 @@
+﻿sample_id,refactoring_type,pick_feature_count,source_class,target_class,picked_features,full_prompt
+1,rename variable,3,SourceClass1,TargetClass1,"The code defines a method that accepts two integer parameters. The method doesn't perform any actions or contain any logic inside its body. The method signature is simple, consisting only of parameter types and names.; User invokes Rename refactoring on lambda parameter and inspects suggested name candidates.; External methods contain inner classes . Internal classes contain fields . The internal class method contains the external method parameter assignment field statement . Rename the parameter to the field name","===== PROMPT SAMPLE 1 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename variable. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass1
+    2. the method name of the variable to be renamed: refMethod
+    3. The variable name to be renamed: variableToBeRenamed
+    4. The package name: test.renamevar 
+
+[Features]
+- The code defines a method that accepts two integer parameters. The method doesn't perform any actions or contain any logic inside its body. The method signature is simple, consisting only of parameter types and names.
+- User invokes Rename refactoring on lambda parameter and inspects suggested name candidates.
+- External methods contain inner classes . Internal classes contain fields . The internal class method contains the external method parameter assignment field statement . Rename the parameter to the field name"
+2,rename variable,4,SourceClass2,TargetClass2,"A method that takes an integer parameter is defined within a class. Inside the method, a local variable is declared but not initialized. The method returns a fixed value, in this case, 0.; Code contains nested inner classes with multiple scopes. An outer local variable is referenced inside nested inner method, and the nested method declares a parameter whose identifier is chosen as new name for outer variable.; A class contains a single field of target type and a collection field of the same target type with plural naming convention.; User invokes Rename refactoring to rename outer local variable to the identifier used by inner method parameter.","===== PROMPT SAMPLE 2 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename variable. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass2
+    2. the method name of the variable to be renamed: refMethod
+    3. The variable name to be renamed: variableToBeRenamed
+    4. The package name: test.renamevar 
+
+[Features]
+- A method that takes an integer parameter is defined within a class. Inside the method, a local variable is declared but not initialized. The method returns a fixed value, in this case, 0.
+- Code contains nested inner classes with multiple scopes. An outer local variable is referenced inside nested inner method, and the nested method declares a parameter whose identifier is chosen as new name for outer variable.
+- A class contains a single field of target type and a collection field of the same target type with plural naming convention.
+- User invokes Rename refactoring to rename outer local variable to the identifier used by inner method parameter."
+3,rename variable,4,SourceClass3,TargetClass3,The parent class contains fields . Subclasses contain field calls . Rename the parameter to the field name; The program defines a method within a class. The method contains a final local variable marked for renaming. The method creates an anonymous inner class. The anonymous inner class contains a method that defines a local variable. The anonymous inner class's method accesses the local variable from the outer method. A local variable in the anonymous inner class is assigned a value.; User invokes Rename refactoring to rename outer local variable to the identifier used by inner method parameter.; The program contains an interface and a class implementing that interface. The interface defines a constant (a static final variable). The implementing class contains a method with local variables. One of the local variables is marked for potential renaming. The method in the class accesses the constant from the interface through the class.,"===== PROMPT SAMPLE 3 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename variable. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass3
+    2. the method name of the variable to be renamed: refMethod
+    3. The variable name to be renamed: variableToBeRenamed
+    4. The package name: test.renamevar 
+
+[Features]
+- The parent class contains fields . Subclasses contain field calls . Rename the parameter to the field name
+- The program defines a method within a class. The method contains a final local variable marked for renaming. The method creates an anonymous inner class. The anonymous inner class contains a method that defines a local variable. The anonymous inner class's method accesses the local variable from the outer method. A local variable in the anonymous inner class is assigned a value.
+- User invokes Rename refactoring to rename outer local variable to the identifier used by inner method parameter.
+- The program contains an interface and a class implementing that interface. The interface defines a constant (a static final variable). The implementing class contains a method with local variables. One of the local variables is marked for potential renaming. The method in the class accesses the constant from the interface through the class."
+4,rename variable,4,SourceClass4,TargetClass4,"The interface contains fields . The statement of the method that implements the interface class contains the field assignment variable . Rename the parameter to the field name; A class that contains getter and setter methods for renaming fields . A statement contains parameter assignments to the renamed field; The class contains fields, . Methods contain inner classes . Internal class call field . Rename the parameter to the field name; The refactoring precondition check fails to detect duplicate parameter name. Transformation proceeds and produces syntactically invalid code with duplicate parameter identifiers.","===== PROMPT SAMPLE 4 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename variable. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass4
+    2. the method name of the variable to be renamed: refMethod
+    3. The variable name to be renamed: variableToBeRenamed
+    4. The package name: test.renamevar 
+
+[Features]
+- The interface contains fields . The statement of the method that implements the interface class contains the field assignment variable . Rename the parameter to the field name
+- A class that contains getter and setter methods for renaming fields . A statement contains parameter assignments to the renamed field
+- The class contains fields, . Methods contain inner classes . Internal class call field . Rename the parameter to the field name
+- The refactoring precondition check fails to detect duplicate parameter name. Transformation proceeds and produces syntactically invalid code with duplicate parameter identifiers."
+5,rename variable,3,SourceClass5,TargetClass5,The interface contains fields . Implement interface class methods that contain fields to assign values to new variables . Rename the variable to the field name; User invokes Rename refactoring with search in strings enabled.; External methods contain inner classes . The internal class contains fields and parameter calls of external methods . Rename the parameter to the field name,"===== PROMPT SAMPLE 5 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename variable. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass5
+    2. the method name of the variable to be renamed: refMethod
+    3. The variable name to be renamed: variableToBeRenamed
+    4. The package name: test.renamevar 
+
+[Features]
+- The interface contains fields . Implement interface class methods that contain fields to assign values to new variables . Rename the variable to the field name
+- User invokes Rename refactoring with search in strings enabled.
+- External methods contain inner classes . The internal class contains fields and parameter calls of external methods . Rename the parameter to the field name"

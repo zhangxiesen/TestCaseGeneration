@@ -32,7 +32,8 @@ def safe_filename(name: str) -> str:
     return name.strip()
 
 if __name__ == "__main__":
-    CSV_PATH = r"E:\TestingRefactoring\RefWork\FeatureSelection\rename_field_prompt_output.csv"
+    # CSV is generated at the repo root (the CWD used when running the FeatureSelection scripts)
+    CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "rename_field_prompt_output.csv")
     OUTPUT_DIR = "java_output"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 

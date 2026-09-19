@@ -1,0 +1,66 @@
+﻿sample_id,refactoring_type,pick_feature_count,source_class,target_class,picked_features,full_prompt
+1,rename field,1,SourceClass1,TargetClass1,Inner classes contain local variables.,"===== PROMPT SAMPLE 1 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename field. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass1
+    2. The field name to be renamed: fieldToBeRenamed
+    3. The package name: test.renamefield 
+
+[Features]
+- Inner classes contain local variables."
+2,rename field,4,SourceClass2,TargetClass2,Rename a field in a class that contains an inner class.; Inner classes contain local variables.; Multiple methods contain calls to fields in anonymous inner classes.; An assignment statement includes renaming fields and assigning local variables.,"===== PROMPT SAMPLE 2 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename field. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass2
+    2. The field name to be renamed: fieldToBeRenamed
+    3. The package name: test.renamefield 
+
+[Features]
+- Rename a field in a class that contains an inner class.
+- Inner classes contain local variables.
+- Multiple methods contain calls to fields in anonymous inner classes.
+- An assignment statement includes renaming fields and assigning local variables."
+3,rename field,3,SourceClass3,TargetClass3,Changing the local variable in the enclosing method may affect the inner class method's access to it and potentially require code adjustments.; A class contains a private renamed field.; The class contains a method which defines local variables and creates an anonymous inner class.,"===== PROMPT SAMPLE 3 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename field. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass3
+    2. The field name to be renamed: fieldToBeRenamed
+    3. The package name: test.renamefield 
+
+[Features]
+- Changing the local variable in the enclosing method may affect the inner class method's access to it and potentially require code adjustments.
+- A class contains a private renamed field.
+- The class contains a method which defines local variables and creates an anonymous inner class."
+4,rename field,3,SourceClass4,TargetClass4,Rename a field using an anonymous class call in a method of another class.; A class contains multiple private fields of different types.; The field is renamed to the local variable name.,"===== PROMPT SAMPLE 4 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename field. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass4
+    2. The field name to be renamed: fieldToBeRenamed
+    3. The package name: test.renamefield 
+
+[Features]
+- Rename a field using an anonymous class call in a method of another class.
+- A class contains multiple private fields of different types.
+- The field is renamed to the local variable name."
+5,rename field,4,SourceClass5,TargetClass5,The parent class contains internal classes and interfaces.; A class contains multiple private fields.; A class contains renamed field and internal classes.; Changing the local variable in the enclosing method may affect the inner class method's access to it and potentially require code adjustments.,"===== PROMPT SAMPLE 5 =====
+[Description]
+Task: Generate a complete, compilable Java program for refactoring engine testing. The target refactoring operation is: rename field. Output only the Java source code with no extra text, descriptions or explanations. The generated Java program must satisfy all requirements in the Conditions and Features sections. Do not introduce any redundant logic beyond the required features.
+
+[Conditions]
+    1. Source class name: SourceClass5
+    2. The field name to be renamed: fieldToBeRenamed
+    3. The package name: test.renamefield 
+
+[Features]
+- The parent class contains internal classes and interfaces.
+- A class contains multiple private fields.
+- A class contains renamed field and internal classes.
+- Changing the local variable in the enclosing method may affect the inner class method's access to it and potentially require code adjustments."
